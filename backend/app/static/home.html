@@ -20,6 +20,7 @@
 			.toggle { display:inline-flex; }
 		}
 		.welcome { text-align:center; margin: 26px 0; }
+		.footer-bar { display:flex; gap:10px; align-items:center; }
 	</style>
 </head>
 <body>
@@ -44,8 +45,9 @@
 			</div>
 			<div id="chat" class="container" style="height: calc(100vh - 140px); grid-template-rows: 1fr auto; max-width: 900px;">
 				<main id="messages" style="background: rgba(14,22,38,0.8);"></main>
-				<footer>
+				<footer class="footer-bar">
 					<input id="query" placeholder="Ask a medical question..." />
+					<button id="mic" class="mic" title="Voice input">🎤</button>
 					<button id="send">Send</button>
 				</footer>
 			</div>
