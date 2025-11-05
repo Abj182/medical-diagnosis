@@ -5,23 +5,27 @@ if (!token) {
 
 const user = JSON.parse(localStorage.getItem('medassist_user') || 'null');
 const userLabel = document.getElementById('userLabel');
-if (user && user.email) userLabel.textContent = user.email;
+if (user && user.email) userLabel && (userLabel.textContent = user.email);
 
 const sidebar = document.getElementById('sidebar');
 const toggleBtn = document.getElementById('toggle');
 const recentsDiv = document.getElementById('recents');
+const filterChips = document.querySelectorAll('.chipbar .chip');
+const newChatBtn = document.getElementById('newChat');
 
 function getRecents() {
 	try { return JSON.parse(localStorage.getItem('medassist_recents') || '[]'); } catch { return []; }
 }
 function setRecents(list) {
-	localStorage.setItem('medassist_recents', JSON.stringify(list.slice(0, 20)));
+	localStorage.setItem('medassist_recents', JSON.stringify(list.slice(0, 50)));
 }
 function renderRecents() {
 	recentsDiv.innerHTML = '';
 	const list = getRecents();
-	if (!list.length) { recentsDiv.innerHTML = '<div class="small">No chats yet</div>'; return; }
-	for (const item of list) {
+	const active = document.querySelector('.chipbar .chip.active')?.dataset.filter || 'all';
+	const filtered = list.filter(x => active === 'all' ? true : (x.tag === active));
+	if (!filtered.length) { recentsDiv.innerHTML = '<div class="small">No chats yet</div>'; return; }
+	for (const item of filtered) {
 		const div = document.createElement('div');
 		div.className = 'item';
 		div.textContent = item.q;
@@ -37,6 +41,7 @@ if (toggleBtn) toggleBtn.onclick = () => sidebar.classList.toggle('open');
 
 document.getElementById('clear').onclick = () => { setRecents([]); renderRecents(); };
 document.getElementById('logout').onclick = () => { localStorage.removeItem('medassist_token'); localStorage.removeItem('medassist_user'); location.href = '/login'; };
+filterChips.forEach(chip => chip.onclick = () => { filterChips.forEach(c=>c.classList.remove('active')); chip.classList.add('active'); renderRecents(); });
 
 const messages = document.getElementById('messages');
 const queryInput = document.getElementById('query');
@@ -44,6 +49,12 @@ const sendBtn = document.getElementById('send');
 const micBtn = document.getElementById('mic');
 const overlay = document.getElementById('overlay');
 const overlayContent = document.getElementById('overlay-content');
+
+function clearConversation() {
+	messages.innerHTML = '';
+}
+
+if (newChatBtn) newChatBtn.onclick = () => clearConversation();
 
 function addMessage(text, who) {
 	const div = document.createElement('div');
@@ -79,8 +90,9 @@ async function sendQuery() {
 			overlayContent.innerHTML = res.matches.map(m => `<div style='margin-bottom:8px'><div style='color:#9bb0d3;font-size:12px'>${m.source}</div><div>${m.text}</div></div>`).join('');
 			overlay.hidden = false;
 		}
+		const active = document.querySelector('.chipbar .chip.active')?.dataset.filter || 'all';
 		const list = getRecents();
-		list.unshift({ q });
+		list.unshift({ q, tag: active === 'all' ? 'textbook' : active });
 		setRecents(list);
 		renderRecents();
 	} finally {

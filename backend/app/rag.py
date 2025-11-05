@@ -31,6 +31,22 @@ def _get_index():
 	return _index
 
 
+@rag_bp.get("/stats")
+def stats():
+	if not _settings.PINECONE_API_KEY:
+		return {"error": "PINECONE_API_KEY not configured"}, 400
+	index = _get_index()
+	try:
+		stat = index.describe_index_stats()
+		return {
+			"index": _settings.PINECONE_INDEX,
+			"namespaces": stat.get("namespaces", {}),
+			"dimension": stat.get("dimension"),
+		}
+	except Exception as e:
+		return {"error": str(e)}, 500
+
+
 @rag_bp.post("/query")
 def query_rag():
 	if not _settings.PINECONE_API_KEY:

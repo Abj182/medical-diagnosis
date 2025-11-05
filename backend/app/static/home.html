@@ -7,46 +7,58 @@
 	<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
 	<link rel="stylesheet" href="/static/styles.css" />
 	<style>
-		.layout { display:grid; grid-template-columns: 260px 1fr; height:100vh; }
+		.layout { display:grid; grid-template-columns: 280px 1fr; height:100vh; }
 		.sidebar { background:#0b1326; border-right:1px solid var(--border); padding:14px; overflow:auto; }
-		.sidebar h3 { margin:4px 0 10px 0; font-size:14px; color:#c6d6ff; }
+		.sidebar h3 { margin:4px 0 10px 0; font-size:14px; color:#c6d6ff; display:flex; align-items:center; gap:8px; }
+		.sidebar .chipbar { display:flex; gap:8px; margin:10px 0 14px 0; }
+		.chip { padding:6px 10px; border-radius:999px; border:1px solid var(--border); background:#0e1a34; color:#cfe; font-size:12px; cursor:pointer; }
+		.chip.active { background:#17315f; color:#d9e5ff; }
 		.sidebar .item { padding:8px 10px; border-radius:8px; margin:6px 0; background:#0e1a34; border:1px solid #16264a; cursor:pointer; }
 		.topbar { display:flex; align-items:center; justify-content:space-between; padding:12px 16px; border-bottom:1px solid var(--border); background:#0b1220; }
 		.toggle { display:none; }
 		@media (max-width: 900px) {
 			.layout { grid-template-columns: 0 1fr; }
-			.sidebar { position: fixed; left:0; top:0; bottom:0; width: 260px; transform: translateX(-100%); transition: transform .2s ease; z-index: 20; }
+			.sidebar { position: fixed; left:0; top:0; bottom:0; width: 280px; transform: translateX(-100%); transition: transform .2s ease; z-index: 20; }
 			.sidebar.open { transform: translateX(0); }
 			.toggle { display:inline-flex; }
 		}
 		.welcome { text-align:center; margin: 26px 0; }
 		.footer-bar { display:flex; gap:10px; align-items:center; }
+		.header-actions { display:flex; gap:10px; }
 	</style>
 </head>
 <body>
 	<div class="topbar">
 		<button class="toggle" id="toggle">☰</button>
-		<div class="logo">MedAssist</div>
-		<div id="userLabel" class="small"></div>
+		<div class="logo">Medical Diagnosis Chatbot</div>
+		<div class="header-actions">
+			<span class="badge">Textbook</span>
+			<span class="badge">Online</span>
+		</div>
 	</div>
 	<div class="layout">
 		<aside class="sidebar" id="sidebar">
-			<h3>Recent chats</h3>
+			<h3>History <button id="newChat" style="margin-left:auto;" class="chip">+ New Chat</button></h3>
+			<div class="chipbar">
+				<div class="chip active" data-filter="all">All Chats</div>
+				<div class="chip" data-filter="textbook">Textbook</div>
+				<div class="chip" data-filter="online">Online</div>
+			</div>
 			<div id="recents"></div>
 			<div style="margin-top:12px; display:flex; gap:8px;">
-				<button id="clear">Clear</button>
+				<button id="clear">Clear Chats</button>
 				<button id="logout" style="background:#e75c5c;border-color:#d14b4b; box-shadow:none;">Logout</button>
 			</div>
 		</aside>
 		<main>
 			<div class="welcome">
 				<h2>Welcome to Medical Assistant</h2>
-				<p class="small">Ask questions and I will answer using your medical textbooks.</p>
+				<p class="small">I can help you understand symptoms and provide information from medical textbooks.</p>
 			</div>
 			<div id="chat" class="container" style="height: calc(100vh - 140px); grid-template-rows: 1fr auto; max-width: 900px;">
 				<main id="messages" style="background: rgba(14,22,38,0.8);"></main>
 				<footer class="footer-bar">
-					<input id="query" placeholder="Ask a medical question..." />
+					<input id="query" placeholder="Ask me anything about health..." />
 					<button id="mic" class="mic" title="Voice input">🎤</button>
 					<button id="send">Send</button>
 				</footer>
