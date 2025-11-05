@@ -44,3 +44,5 @@ button:active { transform: translateY(1px); }
 .layout.collapsed .sidebar { display:none; }
 
 .overlay-toggle { position: fixed; right: 20px; bottom: 20px; width:44px; height:44px; border-radius:12px; border:1px solid var(--border); background:#0a1428; color:#cde; display:flex; align-items:center; justify-content:center; box-shadow:0 6px 16px rgba(0,0,0,.35); }
+
+.sidebar .item.active { background:#153060; border-color:#2a4a88; }

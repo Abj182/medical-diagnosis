@@ -39,6 +39,8 @@ async function openChat(id) {
 	if (!res.chat) return;
 	currentChatId = res.chat.id;
 	renderConversation(res.chat.messages || []);
+	// highlight active
+	[...recentsDiv.querySelectorAll('.item')].forEach(el => el.classList.toggle('active', el.dataset.id === id));
 }
 
 async function createChat(tag='textbook') {
@@ -51,6 +53,7 @@ async function createChat(tag='textbook') {
 function renderConversation(msgs) {
 	messages.innerHTML = '';
 	for (const m of msgs) addMessage(m.text, m.role === 'user' ? 'user' : 'bot');
+	messages.scrollTop = messages.scrollHeight;
 }
 
 function renderRecents() {
@@ -61,15 +64,27 @@ function renderRecents() {
 	for (const c of filtered) {
 		const div = document.createElement('div');
 		div.className = 'item';
+		div.dataset.id = c.id;
 		div.textContent = c.title || 'Untitled';
-		div.onclick = () => openChat(c.id);
+		if (c.id === currentChatId) div.classList.add('active');
 		recentsDiv.appendChild(div);
 	}
 }
 
+// Delegate clicks for stability after re-renders
+recentsDiv.addEventListener('click', (e) => {
+	const item = e.target.closest('.item');
+	if (!item) return;
+	openChat(item.dataset.id);
+});
+
 filterChips.forEach(chip => chip.onclick = () => { filterChips.forEach(c=>c.classList.remove('active')); chip.classList.add('active'); renderRecents(); });
 
-document.getElementById('clear').onclick = async () => { await api('/api/chats/clear', 'POST'); chatList = []; currentChatId = null; renderRecents(); messages.innerHTML=''; };
+// Clear with confirm
+document.getElementById('clear').onclick = async () => {
+	if (!confirm('This will permanently delete all your chats. Continue?')) return;
+	await api('/api/chats/clear', 'POST'); chatList = []; currentChatId = null; renderRecents(); messages.innerHTML=''; };
+
 document.getElementById('logout').onclick = () => { localStorage.clear(); location.href = '/login'; };
 
 if (newChatBtn) newChatBtn.onclick = async () => { const tag = document.querySelector('.chipbar .chip.active')?.dataset.filter || 'textbook'; await createChat(tag==='all'?'textbook':tag); };
@@ -99,12 +114,9 @@ async function sendQuery() {
 			overlayContent.innerHTML = res.matches.map(m => `<div style='margin-bottom:8px'><div style='color:#9bb0d3;font-size:12px'>${m.source}</div><div>${m.text}</div></div>`).join('');
 			overlay.hidden = false;
 		}
-		// If first message, rename chat to prompt
-		const chat = chatList.find(c=>c.id===currentChatId);
-		if (chat && (!chat.title || chat.title==='New Chat')) {
-			await api('/api/chats/rename', 'POST', { id: currentChatId, title: q.slice(0,40) });
-			await loadChats();
-		}
+		// reload list so new chat gets a title and ordering
+		await loadChats();
+		[...recentsDiv.querySelectorAll('.item')].forEach(el => el.classList.toggle('active', el.dataset.id === currentChatId));
 	} finally { sendBtn.disabled = false; }
 }
 
