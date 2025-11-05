@@ -1,4 +1,4 @@
-from flask import Flask, send_from_directory, redirect
+from flask import Flask, redirect
 from flask_cors import CORS
 from flask_jwt_extended import JWTManager
 from .config import Settings
@@ -31,15 +31,15 @@ def create_app() -> Flask:
 
 	@app.get("/login")
 	def login_page():
-		return send_from_directory(app.static_folder, "login.html")
+		return app.send_static_file("login.html")
 
 	@app.get("/register")
 	def register_page():
-		return send_from_directory(app.static_folder, "register.html")
+		return app.send_static_file("register.html")
 
 	@app.get("/home")
 	def home_page():
-		return send_from_directory(app.static_folder, "home.html")
+		return app.send_static_file("home.html")
 
 	@app.get("/api/health")
 	def health():
