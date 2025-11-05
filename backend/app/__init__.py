@@ -16,14 +16,16 @@ def create_app() -> Flask:
 
 	CORS(app, supports_credentials=True)
 	jwt.init_app(app)
-	#init_db(app)
+	init_db(app)
 
 	# Register blueprints
 	from .auth import auth_bp
 	from .rag import rag_bp
+	from .chats import chats_bp
 
 	app.register_blueprint(auth_bp, url_prefix="/api/auth")
 	app.register_blueprint(rag_bp, url_prefix="/api/rag")
+	app.register_blueprint(chats_bp, url_prefix="/api/chats")
 
 	@app.get("/")
 	def root():

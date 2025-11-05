@@ -39,3 +39,8 @@ button:active { transform: translateY(1px); }
 /* Mic button */
 .mic { display:inline-flex; align-items:center; justify-content:center; width:44px; height:44px; border-radius:12px; border:1px solid var(--border); background:#0a1428; color:#cde; }
 .mic.recording { border-color:#ff6b6b; box-shadow:0 0 0 3px rgba(255,107,107,.2); color:#fff; background:#b04141; }
+
+.layout.collapsed { grid-template-columns: 0 1fr !important; }
+.layout.collapsed .sidebar { display:none; }
+
+.overlay-toggle { position: fixed; right: 20px; bottom: 20px; width:44px; height:44px; border-radius:12px; border:1px solid var(--border); background:#0a1428; color:#cde; display:flex; align-items:center; justify-content:center; box-shadow:0 6px 16px rgba(0,0,0,.35); }
