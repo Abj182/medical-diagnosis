@@ -1,4 +1,6 @@
 from typing import List, Dict, Any
+from collections import defaultdict
+from uuid import uuid4
 from flask import Blueprint, request
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from .supabase_client import get_supabase
@@ -16,81 +18,89 @@ def _uid() -> int:
 @jwt_required()
 def list_chats():
 	sb = get_supabase()
-	res = sb.table(TABLE).select("id,title,tag,created_at").eq("user_id", _uid()).order("created_at", desc=True).execute()
-	return {"chats": res.data or []}
+	res = sb.table(TABLE).select("session_id,chat_type,role,content,timestamp").eq("user_id", _uid()).order("timestamp", desc=True).execute()
+	rows: List[Dict[str, Any]] = res.data or []
+	by_session: Dict[str, Dict[str, Any]] = {}
+	# Build latest meta and title from first user message chronologically
+	for r in reversed(rows):
+		sid = r.get("session_id")
+		if not sid:
+			continue
+		item = by_session.setdefault(sid, {"id": sid, "title": "New Chat", "tag": r.get("chat_type") or "textbook", "created_at": r.get("timestamp"), "last_ts": r.get("timestamp")})
+		if r.get("role") == "user" and item.get("title") == "New Chat":
+			item["title"] = (r.get("content") or "New Chat")[:40]
+		if r.get("timestamp") and (item.get("created_at") is None or r["timestamp"] < item["created_at"]):
+			item["created_at"] = r["timestamp"]
+	# Update last_ts from descending pass
+	for r in rows:
+		sid = r.get("session_id")
+		if sid in by_session:
+			by_session[sid]["last_ts"] = r.get("timestamp") or by_session[sid].get("last_ts")
+	chats = sorted(by_session.values(), key=lambda x: x.get("last_ts"), reverse=True)
+	return {"chats": chats}
 
 
 @chats_bp.get("/get")
 @jwt_required()
 def get_chat():
-	chat_id = request.args.get("id")
-	if not chat_id:
-		return {"error": "id required"}, 400
 	sb = get_supabase()
-	res = sb.table(TABLE).select("id,title,tag,messages,created_at").eq("user_id", _uid()).eq("id", chat_id).limit(1).execute()
-	if not res.data:
-		return {"error": "not found"}, 404
-	return {"chat": res.data[0]}
+	sid = request.args.get("id")
+	if not sid:
+		return {"error": "id required"}, 400
+	res = sb.table(TABLE).select("role,content,timestamp").eq("user_id", _uid()).eq("session_id", sid).order("timestamp", asc=True).execute()
+	rows = res.data or []
+	messages = [{"role": "user" if r["role"] == "user" else "bot", "text": r["content"]} for r in rows]
+	return {"chat": {"id": sid, "messages": messages}}
 
 
 @chats_bp.post("/create")
 @jwt_required()
 def create_chat():
-	data = request.get_json(force=True)
-	title = (data.get("title") or "New Chat").strip()
+	data = request.get_json(silent=True) or {}
 	tag = (data.get("tag") or "textbook").strip()
-	sb = get_supabase()
-	res = sb.table(TABLE).insert({
-		"user_id": _uid(),
-		"title": title or "New Chat",
-		"tag": tag,
-		"messages": [],
-	}).execute()
-	chat = res.data[0]
-	return {"id": chat["id"], "title": chat["title"], "tag": chat.get("tag")}, 201
+	# generate a session id client could also provide
+	session_id = str(uuid4())
+	return {"id": session_id, "title": "New Chat", "tag": tag}, 201
 
 
 @chats_bp.post("/append")
 @jwt_required()
 def append_message():
 	data = request.get_json(force=True)
-	chat_id = data.get("id")
+	sid = data.get("id")
 	role = data.get("role")
 	text = data.get("text")
-	if not chat_id or role not in ("user", "bot") or not text:
+	chat_type = (data.get("tag") or "textbook").strip()
+	if not sid or role not in ("user", "bot", "assistant") or not text:
 		return {"error": "id, role, text required"}, 400
+	if role == "bot":
+		role = "assistant"
 	sb = get_supabase()
-	# Fetch current
-	cur = sb.table(TABLE).select("messages").eq("user_id", _uid()).eq("id", chat_id).limit(1).execute()
-	if not cur.data:
-		return {"error": "not found"}, 404
-	msgs: List[Dict[str, Any]] = (cur.data[0].get("messages") or [])
-	msgs.append({"role": role, "text": text})
-	sb.table(TABLE).update({"messages": msgs}).eq("user_id", _uid()).eq("id", chat_id).execute()
+	sb.table(TABLE).insert({
+		"user_id": _uid(),
+		"session_id": sid,
+		"chat_type": chat_type,
+		"role": role,
+		"content": text,
+	}).execute()
 	return {"ok": True}
 
 
 @chats_bp.post("/rename")
 @jwt_required()
 def rename_chat():
-	data = request.get_json(force=True)
-	chat_id = data.get("id")
-	title = (data.get("title") or "").strip()
-	if not chat_id or not title:
-		return {"error": "id and title required"}, 400
-	sb = get_supabase()
-	sb.table(TABLE).update({"title": title}).eq("user_id", _uid()).eq("id", chat_id).execute()
+	# No-op with current schema; title derived from first user message
 	return {"ok": True}
 
 
 @chats_bp.delete("/delete")
 @jwt_required()
 def delete_chat():
-	chat_id = request.args.get("id")
-	if not chat_id:
+	sid = request.args.get("id")
+	if not sid:
 		return {"error": "id required"}, 400
 	sb = get_supabase()
-	sb.table(TABLE).delete().eq("user_id", _uid()).eq("id", chat_id).execute()
+	sb.table(TABLE).delete().eq("user_id", _uid()).eq("session_id", sid).execute()
 	return {"ok": True}
 
 
