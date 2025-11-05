@@ -16,7 +16,7 @@ def create_app() -> Flask:
 
 	CORS(app, supports_credentials=True)
 	jwt.init_app(app)
-	init_db(app)
+	#init_db(app)
 
 	# Register blueprints
 	from .auth import auth_bp
