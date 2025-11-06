@@ -25,8 +25,8 @@ function setCollapsed(v){
 }
 setCollapsed(localStorage.getItem(COLLAPSE_KEY) === '1');
 if (toggleBtn) toggleBtn.onclick = (e) => { e.stopPropagation(); setCollapsed(!layout.classList.contains('collapsed')); };
-// Ensure clicks inside sidebar never toggle
-sidebar.addEventListener('click', (e)=> e.stopPropagation());
+// Ensure clicks inside sidebar never toggle and always expand in case of overlap
+sidebar.addEventListener('click', (e)=> { e.stopPropagation(); setCollapsed(false); });
 
 let chatList = [];
 let currentChatId = null;
@@ -48,6 +48,7 @@ async function openChat(id) {
 	currentChatId = res.chat.id;
 	renderConversation(res.chat.messages || []);
 	[...recentsDiv.querySelectorAll('.item')].forEach(el => el.classList.toggle('active', el.dataset.id === id));
+	messages.scrollTop = messages.scrollHeight;
 }
 
 async function createChat(tag='textbook') {
