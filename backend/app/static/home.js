@@ -21,12 +21,18 @@ const overlayClose = document.getElementById('overlayClose');
 // Sidebar collapse/expand (persist). Only history collapses.
 const COLLAPSE_KEY = 'medassist_sidebar_collapsed';
 function setCollapsed(v){
-	if (v) layout.classList.add('collapsed'); else layout.classList.remove('collapsed');
+	if (v) {
+		layout.classList.add('sidebar-collapsed');
+		sidebar.classList.add('collapsed');
+	} else {
+		layout.classList.remove('sidebar-collapsed');
+		sidebar.classList.remove('collapsed');
+	}
 	localStorage.setItem(COLLAPSE_KEY, String(v ? 1 : 0));
 	sideOpener.classList.toggle('hidden', !v);
 }
 setCollapsed(localStorage.getItem(COLLAPSE_KEY) === '1');
-if (sideToggle) sideToggle.onclick = (e) => { e.stopPropagation(); setCollapsed(!layout.classList.contains('collapsed')); };
+if (sideToggle) sideToggle.onclick = (e) => { e.stopPropagation(); setCollapsed(!layout.classList.contains('sidebar-collapsed')); };
 if (sideOpener) sideOpener.onclick = (e) => { e.stopPropagation(); setCollapsed(false); };
 // Ensure clicks inside sidebar never toggle and always expand in case of overlap
 sidebar.addEventListener('click', (e)=> { e.stopPropagation(); setCollapsed(false); });
