@@ -17,8 +17,16 @@ const overlayContent = document.getElementById('overlay-content');
 const overlayToggle = document.getElementById('overlayToggle');
 const overlayClose = document.getElementById('overlayClose');
 
-// Sidebar collapse/expand like ChatGPT
-if (toggleBtn) toggleBtn.onclick = () => layout.classList.toggle('collapsed');
+// Sidebar collapse/expand like ChatGPT (persist)
+const COLLAPSE_KEY = 'medassist_sidebar_collapsed';
+function setCollapsed(v){
+	if (v) layout.classList.add('collapsed'); else layout.classList.remove('collapsed');
+	localStorage.setItem(COLLAPSE_KEY, String(v ? 1 : 0));
+}
+setCollapsed(localStorage.getItem(COLLAPSE_KEY) === '1');
+if (toggleBtn) toggleBtn.onclick = (e) => { e.stopPropagation(); setCollapsed(!layout.classList.contains('collapsed')); };
+// Ensure clicks inside sidebar never toggle
+sidebar.addEventListener('click', (e)=> e.stopPropagation());
 
 let chatList = [];
 let currentChatId = null;
@@ -39,7 +47,6 @@ async function openChat(id) {
 	if (!res.chat) return;
 	currentChatId = res.chat.id;
 	renderConversation(res.chat.messages || []);
-	// highlight active
 	[...recentsDiv.querySelectorAll('.item')].forEach(el => el.classList.toggle('active', el.dataset.id === id));
 }
 
@@ -71,16 +78,15 @@ function renderRecents() {
 	}
 }
 
-// Delegate clicks for stability after re-renders
 recentsDiv.addEventListener('click', (e) => {
 	const item = e.target.closest('.item');
 	if (!item) return;
+	e.stopPropagation();
 	openChat(item.dataset.id);
 });
 
 filterChips.forEach(chip => chip.onclick = () => { filterChips.forEach(c=>c.classList.remove('active')); chip.classList.add('active'); renderRecents(); });
 
-// Clear with confirm
 document.getElementById('clear').onclick = async () => {
 	if (!confirm('This will permanently delete all your chats. Continue?')) return;
 	await api('/api/chats/clear', 'POST'); chatList = []; currentChatId = null; renderRecents(); messages.innerHTML=''; };
@@ -114,7 +120,6 @@ async function sendQuery() {
 			overlayContent.innerHTML = res.matches.map(m => `<div style='margin-bottom:8px'><div style='color:#9bb0d3;font-size:12px'>${m.source}</div><div>${m.text}</div></div>`).join('');
 			overlay.hidden = false;
 		}
-		// reload list so new chat gets a title and ordering
 		await loadChats();
 		[...recentsDiv.querySelectorAll('.item')].forEach(el => el.classList.toggle('active', el.dataset.id === currentChatId));
 	} finally { sendBtn.disabled = false; }
