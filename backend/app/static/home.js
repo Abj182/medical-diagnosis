@@ -4,7 +4,8 @@ if (!token) { location.href = '/login'; }
 // Elements
 const layout = document.getElementById('layout');
 const sidebar = document.getElementById('sidebar');
-const toggleBtn = document.getElementById('toggle');
+const sideToggle = document.getElementById('sideToggle');
+const sideOpener = document.getElementById('sideOpener');
 const recentsDiv = document.getElementById('recents');
 const filterChips = document.querySelectorAll('.chipbar .chip');
 const newChatBtn = document.getElementById('newChat');
@@ -17,14 +18,16 @@ const overlayContent = document.getElementById('overlay-content');
 const overlayToggle = document.getElementById('overlayToggle');
 const overlayClose = document.getElementById('overlayClose');
 
-// Sidebar collapse/expand like ChatGPT (persist)
+// Sidebar collapse/expand (persist). Only history collapses.
 const COLLAPSE_KEY = 'medassist_sidebar_collapsed';
 function setCollapsed(v){
 	if (v) layout.classList.add('collapsed'); else layout.classList.remove('collapsed');
 	localStorage.setItem(COLLAPSE_KEY, String(v ? 1 : 0));
+	sideOpener.classList.toggle('hidden', !v);
 }
 setCollapsed(localStorage.getItem(COLLAPSE_KEY) === '1');
-if (toggleBtn) toggleBtn.onclick = (e) => { e.stopPropagation(); setCollapsed(!layout.classList.contains('collapsed')); };
+if (sideToggle) sideToggle.onclick = (e) => { e.stopPropagation(); setCollapsed(!layout.classList.contains('collapsed')); };
+if (sideOpener) sideOpener.onclick = (e) => { e.stopPropagation(); setCollapsed(false); };
 // Ensure clicks inside sidebar never toggle and always expand in case of overlap
 sidebar.addEventListener('click', (e)=> { e.stopPropagation(); setCollapsed(false); });
 

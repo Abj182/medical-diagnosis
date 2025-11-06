@@ -49,3 +49,6 @@ button:active { transform: translateY(1px); }
 .messages { overflow:auto; min-height: 0; }
 .footer-bar { position: sticky; bottom: 0; background: rgba(14,22,38,0.9); border-top: 1px solid var(--border); padding-top: 10px; }
 #chatShell { height: calc(100vh - 120px) !important; }
+
+.side-opener { position: fixed; left: 10px; top: 10px; width:40px; height:40px; border-radius:10px; border:1px solid var(--border); background:#0a1428; color:#cde; display:flex; align-items:center; justify-content:center; box-shadow:0 6px 16px rgba(0,0,0,.35); z-index: 50; }
+.side-opener.hidden { display:none; }
