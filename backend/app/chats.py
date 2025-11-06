@@ -47,7 +47,7 @@ def get_chat():
 	sid = request.args.get("id")
 	if not sid:
 		return {"error": "id required"}, 400
-	res = sb.table(TABLE).select("role,content,timestamp").eq("user_id", _uid()).eq("session_id", sid).order("timestamp", asc=True).execute()
+	res = sb.table(TABLE).select("role,content,timestamp").eq("user_id", _uid()).eq("session_id", sid).order("timestamp", desc=False).execute()
 	rows = res.data or []
 	messages = [{"role": "user" if r["role"] == "user" else "bot", "text": r["content"]} for r in rows]
 	return {"chat": {"id": sid, "messages": messages}}
