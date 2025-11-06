@@ -127,6 +127,7 @@ async function sendQuery() {
 
 sendBtn.onclick = sendQuery;
 queryInput.addEventListener('keydown', (e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendQuery(); } });
+queryInput.addEventListener('focus', () => { try { queryInput.scrollIntoView({ block: 'end', behavior: 'smooth' }); } catch(_){} });
 
 // Voice input via Web Speech API
 let recognition = null;

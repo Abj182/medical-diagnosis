@@ -46,3 +46,6 @@ button:active { transform: translateY(1px); }
 .overlay-toggle { position: fixed; right: 20px; bottom: 20px; width:44px; height:44px; border-radius:12px; border:1px solid var(--border); background:#0a1428; color:#cde; display:flex; align-items:center; justify-content:center; box-shadow:0 6px 16px rgba(0,0,0,.35); }
 
 .sidebar .item.active { background:#153060; border-color:#2a4a88; }
+.messages { overflow:auto; min-height: 0; }
+.footer-bar { position: sticky; bottom: 0; background: rgba(14,22,38,0.9); border-top: 1px solid var(--border); padding-top: 10px; }
+#chatShell { height: calc(100vh - 120px) !important; }
