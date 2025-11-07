@@ -22,10 +22,12 @@ def create_app() -> Flask:
 	from .auth import auth_bp
 	from .rag import rag_bp
 	from .chats import chats_bp
+	from .online import online_bp
 
 	app.register_blueprint(auth_bp, url_prefix="/api/auth")
 	app.register_blueprint(rag_bp, url_prefix="/api/rag")
 	app.register_blueprint(chats_bp, url_prefix="/api/chats")
+	app.register_blueprint(online_bp, url_prefix="/api/online")
 
 	@app.get("/")
 	def root():

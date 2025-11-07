@@ -4,68 +4,45 @@
 	<meta charset="utf-8" />
 	<meta name="viewport" content="width=device-width, initial-scale=1" />
 	<title>Home • MedAssist</title>
-	<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
 	<link rel="stylesheet" href="/static/styles.css" />
-	<style>
-		.layout { display:grid; grid-template-columns: 280px 1fr; height:100vh; }
-		.sidebar { background:#0b1326; border-right:1px solid var(--border); padding:14px; overflow:auto; }
-		.sidebar h3 { margin:4px 0 10px 0; font-size:14px; color:#c6d6ff; display:flex; align-items:center; gap:8px; }
-		.sidebar .chipbar { display:flex; gap:8px; margin:10px 0 14px 0; }
-		.chip { padding:6px 10px; border-radius:999px; border:1px solid var(--border); background:#0e1a34; color:#cfe; font-size:12px; cursor:pointer; }
-		.chip.active { background:#17315f; color:#d9e5ff; }
-		.sidebar .item { padding:8px 10px; border-radius:8px; margin:6px 0; background:#0e1a34; border:1px solid #16264a; cursor:pointer; }
-		.topbar { display:flex; align-items:center; justify-content:space-between; padding:12px 16px; border-bottom:1px solid var(--border); background:#0b1220; }
-		.welcome { text-align:center; margin: 26px 0; }
-		.footer-bar { display:flex; gap:10px; align-items:center; }
-		.header-actions { display:flex; gap:10px; }
-		.overlay-head { display:flex; align-items:center; justify-content:space-between; margin-bottom:6px; }
-	</style>
 </head>
 <body>
-	<div class="topbar">
-		<div class="logo">Medical Diagnosis Chatbot</div>
-		<div class="header-actions">
-			<span class="badge">Textbook</span>
-			<span class="badge">Online</span>
+	<div class="container">
+		<div class="header">
+			<div class="brand">MedAssist</div>
+			<div><span class="badge">Secure</span></div>
+		</div>
+		<div class="shell" id="shell">
+			<aside class="sidebar">
+				<h4>History</h4>
+				<button id="newChat" class="btn" style="padding:10px 12px;">New chat</button>
+				<div id="recents" class="list"></div>
+				<button id="logout" class="btn" style="background:#e75c5c;border:none;">Logout</button>
+			</aside>
+			<section class="main">
+				<div class="hero">
+					<h2 class="title">Welcome to your Medical Assistant</h2>
+					<p class="sub">Ask medical questions grounded in your knowledge base or online trusted sources.</p>
+				</div>
+				<div class="center" style="margin-bottom:18px;">
+					<button id="mode-textbook" class="btn mode-btn active" style="padding:8px 14px; margin-right:6px;">Textbook</button>
+					<button id="mode-online" class="btn mode-btn" style="padding:8px 14px;">Online</button>
+				</div>
+				<div id="messages" class="messages"></div>
+				<div class="composer">
+					<button id="voice" class="mic" title="Voice input">🎤</button>
+					<input id="query" class="input" placeholder="Type your question..." />
+					<button id="send" class="btn">Send</button>
+				</div>
+			</section>
 		</div>
 	</div>
-	<div class="layout" id="layout">
-		<aside class="sidebar" id="sidebar">
-			<h3><button id="sideToggle" class="chip" title="Collapse sidebar">☰</button> History <button id="newChat" style="margin-left:auto;" class="chip">+ New Chat</button></h3>
-			<div class="chipbar">
-				<div class="chip active" data-filter="all">All Chats</div>
-				<div class="chip" data-filter="textbook">Textbook</div>
-				<div class="chip" data-filter="online">Online</div>
-			</div>
-			<div id="recents"></div>
-			<div style="margin-top:12px; display:flex; gap:8px;">
-				<button id="clear">Clear Chats</button>
-				<button id="logout" style="background:#e75c5c;border-color:#d14b4b; box-shadow:none;">Logout</button>
-			</div>
-		</aside>
-		<main>
-			<div class="welcome">
-				<h2>Welcome to Medical Assistant</h2>
-				<p class="small">I can help you understand symptoms and provide information from medical textbooks.</p>
-			</div>
-			<div id="chatShell" class="container" style="grid-template-rows: 1fr auto; max-width: 900px;">
-				<main id="messages" class="messages" style="background: rgba(14,22,38,0.8);"></main>
-				<footer class="footer-bar">
-					<input id="query" placeholder="Ask me anything about health..." />
-					<button id="mic" class="mic" title="Voice input">🎤</button>
-					<button id="send">Send</button>
-				</footer>
-			</div>
-		</main>
-	</div>
 
-	<div class="overlay" id="overlay" hidden>
-		<div class="overlay-head"><h4>Gemini overlay summary</h4><button id="overlayClose" class="chip" style="padding:4px 8px;">✕</button></div>
-		<div class="content" id="overlay-content"></div>
-		<div class="small">Context segments used to generate the answer.</div>
+	<div id="overlay" class="overlay" hidden>
+		<h5>Context used</h5>
+		<div id="overlay-content" class="content"></div>
 	</div>
-	<button id="overlayToggle" class="overlay-toggle" title="Show context">⧉</button>
-	<button id="sideOpener" class="side-opener hidden" title="Open sidebar">☰</button>
+	<button id="overlayToggle" class="toggle">⧉</button>
 
 	<script src="/static/home.js"></script>
 </body>
